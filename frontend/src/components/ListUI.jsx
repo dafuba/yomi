@@ -1,0 +1,161 @@
+// Shared building blocks used by all four list pages.
+
+export function PageShell({ title, tag, color, count, onAdd, addOpen, children }) {
+  return (
+    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 32px 80px' }}>
+      {/* Header */}
+      <div className="fade-up" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '36px' }}>
+        <div>
+          <p style={{ fontSize: '11px', letterSpacing: '0.25em', textTransform: 'uppercase', color, marginBottom: '8px', fontWeight: 500 }}>
+            {tag}
+          </p>
+          <h1 style={{ fontFamily: 'var(--font-d)', fontSize: '40px', fontWeight: 300, lineHeight: 1, display: 'flex', alignItems: 'center', gap: '14px' }}>
+            {title}
+            {count > 0 && (
+              <span style={{ fontSize: '14px', fontFamily: 'var(--font-ui)', color: 'var(--muted)', fontWeight: 400, letterSpacing: 0 }}>
+                {count}
+              </span>
+            )}
+          </h1>
+        </div>
+        <button onClick={onAdd} style={{
+          background: addOpen ? 'var(--card)' : color,
+          color: addOpen ? 'var(--muted)' : '#000',
+          border: addOpen ? '1px solid var(--border)' : 'none',
+          borderRadius: '10px', padding: '10px 20px',
+          fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+          transition: 'all 0.2s', letterSpacing: '0.03em',
+        }}>
+          {addOpen ? 'Cancel' : '+ Add'}
+        </button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+export function AddForm({ onSubmit, onCancel, color, children }) {
+  return (
+    <form onSubmit={onSubmit} className="fade-in" style={{
+      background: 'var(--card)',
+      border: `1px solid ${color}44`,
+      borderRadius: '14px',
+      padding: '24px',
+      display: 'flex', flexDirection: 'column', gap: '16px',
+      marginBottom: '8px',
+    }}>
+      {children}
+      <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+        <button type="submit" style={{
+          background: color, color: '#000', border: 'none',
+          borderRadius: '8px', padding: '9px 20px',
+          fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+        }}>
+          Save
+        </button>
+        <button type="button" onClick={onCancel} style={{
+          background: 'none', color: 'var(--muted)', border: '1px solid var(--border)',
+          borderRadius: '8px', padding: '9px 16px', fontSize: '13px', cursor: 'pointer',
+        }}>
+          Cancel
+        </button>
+      </div>
+    </form>
+  )
+}
+
+export function Field({ label, required, children }) {
+  const inputStyle = {
+    background: 'var(--surface)', border: '1px solid var(--border)',
+    borderRadius: '8px', padding: '9px 12px',
+    color: 'var(--text)', fontSize: '14px', width: '100%', outline: 'none',
+    resize: 'vertical',
+  }
+  return (
+    <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <span style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 500 }}>
+        {label}{required && ' *'}
+      </span>
+      {/* Clone children and inject styling */}
+      {React.cloneElement(children, {
+        style: { ...inputStyle, ...(children.props.style || {}) }
+      })}
+    </label>
+  )
+}
+
+export function AnimeCard({ item, onRemove, index, color, children }) {
+  const [hovered, setHovered] = useState(false)
+  const date = item.addedAt ? new Date(item.addedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+
+  return (
+    <div
+      className="fade-up"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        animationDelay: `${index * 0.04}s`,
+        background: hovered ? 'var(--card-h)' : 'var(--card)',
+        border: `1px solid ${hovered ? color + '44' : 'var(--border)'}`,
+        borderRadius: '12px', padding: '18px 20px',
+        transition: 'all 0.18s',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <div style={{ fontFamily: 'var(--font-d)', fontSize: '20px', fontWeight: 400, color: 'var(--text)' }}>
+            {item.title}
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '3px' }}>{date}</div>
+        </div>
+        <button onClick={() => onRemove(item.id)} style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          color: 'var(--muted)', fontSize: '16px', padding: '0 4px',
+          opacity: hovered ? 1 : 0, transition: 'opacity 0.15s',
+          lineHeight: 1,
+        }}>
+          ×
+        </button>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+export function EmptyState({ text }) {
+  return (
+    <div className="fade-in" style={{
+      textAlign: 'center', padding: '64px 0',
+      color: 'var(--muted)', fontSize: '14px', fontWeight: 300,
+    }}>
+      {text}
+    </div>
+  )
+}
+
+export function Stars({ value = 0, onChange, readOnly = false, color = 'var(--accent)' }) {
+  return (
+    <div style={{ display: 'flex', gap: '4px' }}>
+      {[1, 2, 3, 4, 5].map(n => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => !readOnly && onChange?.(n)}
+          style={{
+            background: 'none', border: 'none', padding: '0',
+            fontSize: '18px', cursor: readOnly ? 'default' : 'pointer',
+            color: n <= value ? color : 'var(--border)',
+            transition: 'color 0.1s',
+          }}
+        >
+          ★
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// React needs to be in scope for cloneElement
+import React, { useState } from 'react'

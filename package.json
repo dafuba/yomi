@@ -1,0 +1,14 @@
+{
+  "name": "yomi",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "fastapi": "concurrently --names \"API,UI\" --prefix-colors \"cyan,magenta\" \"npm run backend\" \"npm run frontend\"",
+    "dev": "npm run fastapi",
+    "backend": "cd backend && uvicorn main:app --reload --port 8000",
+    "frontend": "cd frontend && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
