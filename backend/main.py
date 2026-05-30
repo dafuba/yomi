@@ -8,7 +8,7 @@ app = FastAPI(title="Yomi API")
 # In production, replace "*" with your actual Vercel domain.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],  # Tighten to Vercel URL after first deploy
     allow_methods=["*"],
     allow_headers=["*"],
 )
