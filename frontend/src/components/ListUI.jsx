@@ -1,9 +1,9 @@
 // Shared building blocks used by all four list pages.
+import React, { useState } from 'react'
 
 export function PageShell({ title, tag, color, count, onAdd, addOpen, children }) {
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 32px 80px' }}>
-      {/* Header */}
       <div className="fade-up" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '36px' }}>
         <div>
           <p style={{ fontSize: '11px', letterSpacing: '0.25em', textTransform: 'uppercase', color, marginBottom: '8px', fontWeight: 500 }}>
@@ -78,7 +78,6 @@ export function Field({ label, required, children }) {
       <span style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 500 }}>
         {label}{required && ' *'}
       </span>
-      {/* Clone children and inject styling */}
       {React.cloneElement(children, {
         style: { ...inputStyle, ...(children.props.style || {}) }
       })}
@@ -88,7 +87,11 @@ export function Field({ label, required, children }) {
 
 export function AnimeCard({ item, onRemove, index, color, children }) {
   const [hovered, setHovered] = useState(false)
-  const date = item.addedAt ? new Date(item.addedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+  const date = item.addedAt
+    ? new Date(item.addedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : ''
+  const hasMeta = item.score != null || item.episodes != null || item.year != null
+  const displayTitle = item.title_english || item.title
 
   return (
     <div
@@ -99,38 +102,86 @@ export function AnimeCard({ item, onRemove, index, color, children }) {
         animationDelay: `${index * 0.04}s`,
         background: hovered ? 'var(--card-h)' : 'var(--card)',
         border: `1px solid ${hovered ? color + '44' : 'var(--border)'}`,
-        borderRadius: '12px', padding: '18px 20px',
+        borderRadius: '12px',
+        padding: item.image_url ? '14px 18px' : '18px 20px',
         transition: 'all 0.18s',
+        display: 'flex',
+        gap: '14px',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ fontFamily: 'var(--font-d)', fontSize: '20px', fontWeight: 400, color: 'var(--text)' }}>
-            {item.title}
+      {/* Poster thumbnail — only present when Jikan data was stored with this item */}
+      {item.image_url && (
+        item.url
+          ? <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ flexShrink: 0, lineHeight: 0, alignSelf: 'flex-start' }}>
+              <img src={item.image_url} alt={displayTitle} style={{ width: '52px', height: '74px', objectFit: 'cover', borderRadius: '6px' }} />
+            </a>
+          : <img src={item.image_url} alt={displayTitle} style={{ width: '52px', height: '74px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, alignSelf: 'flex-start' }} />
+      )}
+
+      {/* Main content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ minWidth: 0, paddingRight: '8px' }}>
+            <div style={{
+              fontFamily: 'var(--font-d)', fontSize: '20px', fontWeight: 400,
+              color: 'var(--text)',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {displayTitle}
+            </div>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '3px', flexWrap: 'wrap' }}>
+              {hasMeta ? (
+                <>
+                  {item.score != null && (
+                    <span style={{ fontSize: '11px', color: 'var(--muted)' }}>★ {Number(item.score).toFixed(1)}</span>
+                  )}
+                  {item.episodes != null && (
+                    <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{item.episodes} eps</span>
+                  )}
+                  {item.year != null && (
+                    <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{item.year}</span>
+                  )}
+                </>
+              ) : (
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{date}</span>
+              )}
+            </div>
           </div>
-          <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '3px' }}>{date}</div>
+          <button
+            onClick={() => onRemove(item.id)}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--muted)', fontSize: '16px', padding: '0 4px',
+              opacity: hovered ? 1 : 0, transition: 'opacity 0.15s',
+              lineHeight: 1, flexShrink: 0,
+            }}
+          >
+            ×
+          </button>
         </div>
-        <button onClick={() => onRemove(item.id)} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--muted)', fontSize: '16px', padding: '0 4px',
-          opacity: hovered ? 1 : 0, transition: 'opacity 0.15s',
-          lineHeight: 1,
-        }}>
-          ×
-        </button>
+        {children}
       </div>
-      {children}
     </div>
   )
 }
 
-export function EmptyState({ text }) {
+export function EmptyState({ text, onChat }) {
   return (
     <div className="fade-in" style={{
       textAlign: 'center', padding: '64px 0',
       color: 'var(--muted)', fontSize: '14px', fontWeight: 300,
     }}>
-      {text}
+      <p>{text}</p>
+      {onChat && (
+        <button onClick={onChat} style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          color: 'var(--purple)', fontSize: '13px',
+          fontFamily: 'var(--font-ui)', display: 'block',
+          margin: '12px auto 0',
+        }}>
+          Chat with Yomi AI →
+        </button>
+      )}
     </div>
   )
 }
@@ -156,6 +207,3 @@ export function Stars({ value = 0, onChange, readOnly = false, color = 'var(--ac
     </div>
   )
 }
-
-// React needs to be in scope for cloneElement
-import React, { useState } from 'react'

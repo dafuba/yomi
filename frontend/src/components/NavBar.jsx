@@ -16,7 +16,6 @@ export default function NavBar({ currentPage, onNavigate }) {
       display: 'flex', alignItems: 'center',
       padding: '0 32px', height: '58px', gap: '8px',
     }}>
-      {/* Brand */}
       <button onClick={() => onNavigate('home')} style={{
         background: 'none', border: 'none', cursor: 'pointer',
         fontFamily: 'var(--font-d)', fontSize: '20px', fontWeight: 600,
@@ -27,7 +26,6 @@ export default function NavBar({ currentPage, onNavigate }) {
         YOMI
       </button>
 
-      {/* Nav links */}
       {NAV.map(item => {
         const active = currentPage === item.id
         return (
@@ -39,7 +37,7 @@ export default function NavBar({ currentPage, onNavigate }) {
               border: 'none', cursor: 'pointer',
               padding: '6px 14px', borderRadius: '8px',
               fontSize: '13px', fontWeight: active ? 500 : 400,
-              color: active ? 'var(--text)' : 'var(--muted)',
+              color: active ? item.dot : 'var(--muted)',
               letterSpacing: '0.03em',
               display: 'flex', alignItems: 'center', gap: '6px',
               transition: 'color 0.15s, background 0.15s',

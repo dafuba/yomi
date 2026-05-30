@@ -2,7 +2,6 @@ import { useChat } from '../hooks/useChat'
 import { useAnimeList } from '../hooks/useAnimeList'
 import ChatWindow from '../components/ChatWindow'
 import InputBar from '../components/InputBar'
-import SuggestionCards from '../components/SuggestionCards'
 
 const MODELS = [
   { id: 'claude-haiku-4-5-20251001', label: 'Haiku',  note: 'fast & cheap' },
@@ -10,7 +9,6 @@ const MODELS = [
   { id: 'claude-opus-4-8',           label: 'Opus',   note: 'most capable' },
 ]
 
-// Map list IDs returned by the backend to the right hook key + default fields
 const LIST_DEFAULTS = {
   currently_watching: (title) => ({ title, currentEpisode: 1, totalEpisodes: null }),
   recently_watched:   (title) => ({ title, rating: 0, watchedAt: new Date().toISOString() }),
@@ -28,7 +26,6 @@ const STORAGE_KEYS = {
 export default function Chat() {
   const { messages, isLoading, error, model, setModel, suggestions, dismissSuggestion, sendMessage, clearConversation } = useChat()
 
-  // One hook per list — each manages its own localStorage key
   const lists = {
     currently_watching: useAnimeList(STORAGE_KEYS.currently_watching),
     recently_watched:   useAnimeList(STORAGE_KEYS.recently_watched),
@@ -38,12 +35,14 @@ export default function Chat() {
 
   function handleAccept(suggestion) {
     if (suggestion.action === 'remove') {
-      // Search all lists for the title and remove wherever found
       Object.values(lists).forEach(hook => hook.removeByTitle(suggestion.title))
     } else {
       const listHook = lists[suggestion.list]
       const defaults = LIST_DEFAULTS[suggestion.list]
-      if (listHook && defaults) listHook.addItem(defaults(suggestion.title))
+      if (listHook && defaults) {
+        // Spread Jikan metadata so the list pages can show rich cards without another API call
+        listHook.addItem({ ...defaults(suggestion.title), ...(suggestion.jikan ?? {}) })
+      }
     }
     dismissSuggestion(suggestion.id)
   }
@@ -94,19 +93,19 @@ export default function Chat() {
         </div>
       </div>
 
-      <ChatWindow messages={messages} isLoading={isLoading} />
+      <ChatWindow
+        messages={messages}
+        isLoading={isLoading}
+        suggestions={suggestions}
+        onAccept={handleAccept}
+        onDismiss={dismissSuggestion}
+      />
 
       {error && (
         <div style={{ color: 'var(--red)', padding: '8px 24px', fontSize: '13px', background: 'var(--surface)' }}>
           {error}
         </div>
       )}
-
-      <SuggestionCards
-        suggestions={suggestions}
-        onAccept={handleAccept}
-        onDismiss={dismissSuggestion}
-      />
 
       <InputBar onSend={sendMessage} isLoading={isLoading} />
     </div>

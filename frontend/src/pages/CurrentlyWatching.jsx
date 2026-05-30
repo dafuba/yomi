@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAnimeList } from '../hooks/useAnimeList'
 import { PageShell, AddForm, Field, AnimeCard, EmptyState } from '../components/ListUI'
 
-export default function CurrentlyWatching() {
+export default function CurrentlyWatching({ onNavigate }) {
   const { items, addItem, removeItem, updateItem } = useAnimeList('yomi-currently')
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({ title: '', total: '', current: '1' })
@@ -49,14 +49,13 @@ export default function CurrentlyWatching() {
       )}
 
       {items.length === 0 && !open
-        ? <EmptyState text="Nothing in progress yet. Start tracking a series." />
+        ? <EmptyState text="Nothing in progress yet. Start tracking a series." onChat={onNavigate ? () => onNavigate('chat') : undefined} />
         : items.map((item, i) => (
           <AnimeCard key={item.id} item={item} onRemove={removeItem} index={i} color="var(--green)">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px' }}>
               <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
                 Ep {item.currentEpisode}{item.totalEpisodes ? ` / ${item.totalEpisodes}` : ''}
               </span>
-              {/* Progress bar */}
               {item.totalEpisodes && (
                 <div style={{ flex: 1, height: '3px', background: 'var(--border)', borderRadius: '2px' }}>
                   <div style={{

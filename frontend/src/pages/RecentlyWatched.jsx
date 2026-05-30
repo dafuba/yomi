@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAnimeList } from '../hooks/useAnimeList'
 import { PageShell, AddForm, Field, AnimeCard, EmptyState, Stars } from '../components/ListUI'
 
-export default function RecentlyWatched() {
+export default function RecentlyWatched({ onNavigate }) {
   const { items, addItem, removeItem } = useAnimeList('yomi-recent')
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({ title: '', rating: '0', notes: '' })
@@ -42,7 +42,7 @@ export default function RecentlyWatched() {
       )}
 
       {items.length === 0 && !open
-        ? <EmptyState text="No completed series logged yet." />
+        ? <EmptyState text="No completed series logged yet." onChat={onNavigate ? () => onNavigate('chat') : undefined} />
         : items.map((item, i) => (
           <AnimeCard key={item.id} item={item} onRemove={removeItem} index={i} color="var(--accent)">
             <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '16px' }}>

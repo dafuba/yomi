@@ -28,14 +28,6 @@ class ChatRequest(BaseModel):
     model: str = DEFAULT_MODEL
 
 
-class Suggestion(BaseModel):
-    id: str
-    action: str = "add"
-    title: str
-    list: str
-    reason: str
-
-
 class EnrichedAnime(BaseModel):
     mal_id: Optional[int] = None
     title: Optional[str] = None
@@ -45,6 +37,15 @@ class EnrichedAnime(BaseModel):
     year: Optional[int] = None
     image_url: Optional[str] = None
     url: Optional[str] = None
+
+
+class Suggestion(BaseModel):
+    id: str
+    action: str = "add"
+    title: str
+    list: str
+    reason: str
+    jikan: Optional[EnrichedAnime] = None
 
 
 class ChatResponse(BaseModel):
@@ -70,12 +71,24 @@ async def chat(request: ChatRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    titles = _extract_titles(reply)
-    enriched: list[Optional[dict]] = []
-    if titles:
-        try:
-            enriched = await enrich_titles(titles)
-        except Exception:
-            enriched = [None] * len(titles)
+    # Collect all titles to enrich in one pass — deduplicated to avoid redundant Jikan calls.
+    rec_titles = _extract_titles(reply)
+    sug_titles = [s["title"] for s in suggestions]
+    all_titles = list(dict.fromkeys(rec_titles + sug_titles))
 
-    return ChatResponse(reply=reply, suggestions=suggestions, enriched=enriched)
+    enriched_map: dict[str, Optional[dict]] = {}
+    if all_titles:
+        try:
+            results = await enrich_titles(all_titles)
+            for title, result in zip(all_titles, results):
+                enriched_map[title.lower()] = result
+        except Exception:
+            pass
+
+    enriched = [enriched_map.get(t.lower()) for t in rec_titles]
+    enriched_suggestions = [
+        {**s, "jikan": enriched_map.get(s["title"].lower())}
+        for s in suggestions
+    ]
+
+    return ChatResponse(reply=reply, suggestions=enriched_suggestions, enriched=enriched)

@@ -7,7 +7,7 @@ Read this before touching any file.
 
 ## Context
 
-This project lives inside `project-dir-test/` — a personal sandbox for learning
+This project lives inside `playground/` — a personal sandbox for learning
 fullstack project structure and development patterns. The goal is to get familiar
 with how real projects are organised so the patterns can be reused later.
 
@@ -31,7 +31,7 @@ Stack:
 ## Folder layout
 
 ```
-project-dir-test/              ← sandbox root (other test projects go here too)
+playground/              ← sandbox root (other test projects go here too)
 └── yomi/                      ← this project
     ├── CLAUDE.md              ← you are here
     ├── .gitignore
@@ -76,7 +76,7 @@ project-dir-test/              ← sandbox root (other test projects go here too
 ### Backend
 
 ```bash
-cd project-dir-test/yomi/backend
+cd playground/yomi/backend
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -86,7 +86,7 @@ uvicorn main:app --reload --port 8000
 ### Frontend
 
 ```bash
-cd project-dir-test/yomi/frontend
+cd playground/yomi/frontend
 npm install
 npm run dev                     # runs on http://localhost:5173
 ```
@@ -180,7 +180,7 @@ Don't be robotic. You love anime and it shows.
 
 ## First command to run (in Claude Code)
 
-After opening `project-dir-test/yomi/` in VS Code, tell Claude Code:
+After opening `playground/yomi/` in VS Code, tell Claude Code:
 
 > "Scaffold the full project structure from CLAUDE.md with working starter files —
 > including requirements.txt, main.py, all app/ files, and the React frontend."

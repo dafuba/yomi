@@ -8,7 +8,7 @@ const PRIORITIES = [
   { value: 'low',    label: 'Low',    color: '#55556e' },
 ]
 
-export default function Watchlist() {
+export default function Watchlist({ onNavigate }) {
   const { items, addItem, removeItem } = useAnimeList('yomi-watchlist')
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({ title: '', priority: 'medium', notes: '' })
@@ -56,7 +56,7 @@ export default function Watchlist() {
       )}
 
       {items.length === 0 && !open
-        ? <EmptyState text="Your watchlist is empty. Add something to look forward to." />
+        ? <EmptyState text="Your watchlist is empty. Add something to look forward to." onChat={onNavigate ? () => onNavigate('chat') : undefined} />
         : items.map((item, i) => (
           <AnimeCard key={item.id} item={item} onRemove={removeItem} index={i} color="var(--orange)">
             <div style={{ marginTop: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>

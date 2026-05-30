@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAnimeList } from '../hooks/useAnimeList'
 import { PageShell, AddForm, Field, AnimeCard, EmptyState, Stars } from '../components/ListUI'
 
-export default function Favourites() {
+export default function Favourites({ onNavigate }) {
   const { items, addItem, removeItem } = useAnimeList('yomi-favourites')
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({ title: '', rating: '5', notes: '' })
@@ -41,7 +41,7 @@ export default function Favourites() {
       )}
 
       {items.length === 0 && !open
-        ? <EmptyState text="No favourites yet. Add the anime that left a mark." />
+        ? <EmptyState text="No favourites yet. Add the anime that left a mark." onChat={onNavigate ? () => onNavigate('chat') : undefined} />
         : items.map((item, i) => (
           <AnimeCard key={item.id} item={item} onRemove={removeItem} index={i} color="var(--pink)">
             <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
