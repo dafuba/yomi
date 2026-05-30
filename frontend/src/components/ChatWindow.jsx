@@ -26,7 +26,7 @@ export default function ChatWindow({ messages, isLoading }) {
       )}
 
       {messages.map((msg, i) => (
-        <MessageBubble key={i} role={msg.role} content={msg.content} />
+        <MessageBubble key={i} role={msg.role} content={msg.content} enriched={msg.enriched} />
       ))}
 
       {isLoading && (

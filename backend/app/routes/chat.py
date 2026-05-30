@@ -1,6 +1,10 @@
+import asyncio
+import re
+from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.services.claude import get_recommendation
+from app.services.jikan import enrich_titles
 
 router = APIRouter()
 
@@ -32,21 +36,46 @@ class Suggestion(BaseModel):
     reason: str
 
 
+class EnrichedAnime(BaseModel):
+    mal_id: Optional[int] = None
+    title: Optional[str] = None
+    title_english: Optional[str] = None
+    episodes: Optional[int] = None
+    score: Optional[float] = None
+    year: Optional[int] = None
+    image_url: Optional[str] = None
+    url: Optional[str] = None
+
+
 class ChatResponse(BaseModel):
     reply: str
     suggestions: list[Suggestion] = []
+    enriched: list[Optional[EnrichedAnime]] = []
+
+
+def _extract_titles(text: str) -> list[str]:
+    matches = re.findall(r"\*\*([^*]+?)\*\*", text)
+    return [m.strip(" :—-") for m in matches if 2 < len(m) < 80]
 
 
 @router.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest):
+async def chat(request: ChatRequest):
     if request.model not in ALLOWED_MODELS:
         raise HTTPException(status_code=400, detail=f"Unknown model: {request.model}")
 
     messages = [{"role": m.role, "content": m.content} for m in request.messages]
 
     try:
-        reply, suggestions = get_recommendation(messages, model=request.model)
+        reply, suggestions = await asyncio.to_thread(get_recommendation, messages, model=request.model)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return ChatResponse(reply=reply, suggestions=suggestions)
+    titles = _extract_titles(reply)
+    enriched: list[Optional[dict]] = []
+    if titles:
+        try:
+            enriched = await enrich_titles(titles)
+        except Exception:
+            enriched = [None] * len(titles)
+
+    return ChatResponse(reply=reply, suggestions=suggestions, enriched=enriched)

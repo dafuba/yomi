@@ -43,13 +43,16 @@ export function useChat() {
       const response = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: updatedMessages.slice(-MAX_CONTEXT_MESSAGES), model }),
+        body: JSON.stringify({
+          messages: updatedMessages.slice(-MAX_CONTEXT_MESSAGES).map(m => ({ role: m.role, content: m.content })),
+          model,
+        }),
       })
 
       if (!response.ok) throw new Error(`Server error: ${response.status}`)
 
       const data = await response.json()
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply, enriched: data.enriched ?? [] }])
       setSuggestions(data.suggestions ?? [])
     } catch (err) {
       setError(err.message)
