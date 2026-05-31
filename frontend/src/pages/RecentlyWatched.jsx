@@ -26,6 +26,8 @@ export default function RecentlyWatched({ onNavigate }) {
       count={items.length}
       onAdd={() => setOpen(o => !o)}
       addOpen={open}
+      onChat={onNavigate ? () => onNavigate('chat') : undefined}
+      lastAdded={items[0]?.addedAt}
     >
       {open && (
         <AddForm onSubmit={handleAdd} onCancel={() => setOpen(false)} color="var(--accent)">

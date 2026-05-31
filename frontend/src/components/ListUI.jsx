@@ -1,9 +1,23 @@
 // Shared building blocks used by all four list pages.
 import React, { useState } from 'react'
 
-export function PageShell({ title, tag, color, count, onAdd, addOpen, children }) {
+const CHAT_CTAS = [
+  "not sure what to watch? ask Yomi →",
+  "ask Yomi what to watch tonight →",
+  "let Yomi find you something good →",
+  "tell Yomi what you're in the mood for →",
+  "find your next obsession →",
+]
+
+export function PageShell({ title, tag, color, count, onAdd, addOpen, onChat, lastAdded, children }) {
+  const [cta] = useState(() => CHAT_CTAS[Math.floor(Math.random() * CHAT_CTAS.length)])
+
+  const formattedLastAdded = lastAdded
+    ? new Date(lastAdded).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : null
+
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 32px 80px' }}>
+    <div className="list-shell">
       <div className="fade-up" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '36px' }}>
         <div>
           <p style={{ fontSize: '11px', letterSpacing: '0.25em', textTransform: 'uppercase', color, marginBottom: '8px', fontWeight: 500 }}>
@@ -29,8 +43,58 @@ export function PageShell({ title, tag, color, count, onAdd, addOpen, children }
           {addOpen ? 'Cancel' : '+ Add'}
         </button>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {children}
+
+      <div className="list-body">
+        <div className="list-items">
+          {children}
+        </div>
+
+        <aside className="list-sidebar">
+          {count > 0 && (
+            <div>
+              <div style={{ fontSize: '48px', fontFamily: 'var(--font-d)', color, lineHeight: 1, fontWeight: 300 }}>
+                {count}
+              </div>
+              <div style={{ fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--muted)', marginTop: '6px' }}>
+                anime
+              </div>
+            </div>
+          )}
+
+          {count > 0 && <div style={{ height: '1px', background: 'var(--border)' }} />}
+
+          {formattedLastAdded && (
+            <div>
+              <div style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '5px' }}>
+                Last added
+              </div>
+              <div style={{ fontSize: '13px', color: 'var(--text)' }}>{formattedLastAdded}</div>
+            </div>
+          )}
+
+          {onChat && (
+            <>
+              {count > 0 && <div style={{ height: '1px', background: 'var(--border)' }} />}
+              <button
+                onClick={onChat}
+                style={{
+                  background: 'none',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  padding: '11px 14px',
+                  color: 'var(--purple)',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  lineHeight: 1.4,
+                  transition: 'border-color 0.15s, color 0.15s',
+                }}
+              >
+                {cta}
+              </button>
+            </>
+          )}
+        </aside>
       </div>
     </div>
   )

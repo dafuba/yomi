@@ -90,7 +90,7 @@ function FeatureCard({ feature, onClick, index }) {
 
 export default function Home({ onNavigate }) {
   return (
-    <div style={{ padding: '72px 40px 80px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: '48px 40px 80px', maxWidth: '1600px', margin: '0 auto' }}>
       {/* Hero */}
       <div className="fade-up" style={{ textAlign: 'center', marginBottom: '80px' }}>
         <p style={{
@@ -121,7 +121,7 @@ export default function Home({ onNavigate }) {
       {/* Feature grid — first card wide, others fill */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
         gap: '16px',
       }}>
         {FEATURES.map((f, i) => (
